@@ -1,0 +1,6 @@
+__pycache__/
+venv/
+ffmpeg/
+
+cam*/*
+staging_images/*
