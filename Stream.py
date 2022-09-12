@@ -17,5 +17,5 @@ class Stream:
             self.simulation_url = video_info.get('url')
 
     def get_frames(self):
-        ffmpeg_command = 'ffmpeg -i "'+self.simulation_url+'" -vf fps=10/60 '+self.name+'/image.cam0_%04d.jpg -loglevel quiet -hide_banner'
+        ffmpeg_command = 'ffmpeg -i "'+self.simulation_url+'" -vf fps=1/60 -loglevel quiet -hide_banner -strftime 1 '+self.name+'/'+self.name+'+%d-%m-%Y_%H-%M-%S.jpg'
         os.system(ffmpeg_command)
