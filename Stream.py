@@ -3,9 +3,10 @@ import os
 
 
 class Stream:
-    def __init__(self, name, url):
+    def __init__(self, name, url, fps=1):
         self.name = name
         self.url = url
+        self.fps = fps
 
     def simulate_url(self):
         ydl_opts = {
@@ -17,5 +18,5 @@ class Stream:
             self.simulation_url = video_info.get('url')
 
     def get_frames(self):
-        ffmpeg_command = 'ffmpeg -i "'+self.simulation_url+'" -vf fps=1/60 -loglevel quiet -hide_banner -strftime 1 '+self.name+'/'+self.name+'+%d-%m-%Y_%H-%M-%S.jpg'
+        ffmpeg_command = 'ffmpeg -i "'+self.simulation_url+'" -vf fps='+str(self.fps)+'/60 -loglevel quiet -hide_banner -strftime 1 '+self.name+'/'+self.name+'+%d-%m-%Y_%H-%M-%S.jpg'
         os.system(ffmpeg_command)
