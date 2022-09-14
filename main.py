@@ -1,6 +1,7 @@
 import os
 import fnmatch
 from Stream import Stream
+from Database import Database
 from multiprocessing import Process
 from pathlib import Path
 from pytz import timezone
@@ -9,6 +10,7 @@ from datetime import datetime
 
 streams = []
 buff_th = 5
+load_th = 10
 buff_dir = "staging_images"
 tzmap = {"cam0" : "UTC"}
 
@@ -18,6 +20,12 @@ def check_images():
             if len(fnmatch.filter(os.listdir(cam_dir), '*')) > buff_th:
                 buffer_images(cam_dir)
 
+def check_load(db):
+    while True:
+        if len(fnmatch.filter(os.listdir(buff_dir), '*')) > load_th:
+            load_images(db)
+
+
 def buffer_images(cam_dir):
     replace_count = 0
     for image in Path(str(cam_dir)).glob("*"):
@@ -25,9 +33,12 @@ def buffer_images(cam_dir):
         replace_count += 1
     print("STAGED IMAGES: "+str(replace_count))
 
-def load_images():
-    # load images to database
-    pass
+def load_images(db):
+    load_count = 0
+    for image in Path(buff_dir).glob("*"):
+        db.upload_blob(image.name, image), os.remove(image)
+        load_count += 1
+    print("LOADED IMAGES: "+str(load_count))
 
 def correct_timezone(image, tz):
     if tz == None: tz = 'Europe/Amsterdam'
@@ -36,9 +47,11 @@ def correct_timezone(image, tz):
     return adj_tz
 
 if __name__ == '__main__':
+    db = Database()
+    db.set_container("frames")
 
-    streams.append(Stream("cam0", "https://www.youtube.com/watch?v=gcDWT-mTCOI", 10))
-    streams.append(Stream("cam1", "https://www.youtube.com/watch?v=BQFGmIXwl-A", 10))
+    streams.append(Stream("cam0", "https://www.youtube.com/watch?v=gcDWT-mTCOI", 1))
+    streams.append(Stream("cam1", "https://www.youtube.com/watch?v=6NIt6ibAD6I", 1))
 
     for cam in streams:
         cam.simulate_url()
@@ -47,3 +60,6 @@ if __name__ == '__main__':
     
     staging_process = Process(target=check_images)
     staging_process.start()
+
+    loading_process = Process(target=check_load(db))
+    loading_process.start()

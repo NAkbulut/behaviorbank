@@ -4,3 +4,5 @@ ffmpeg/
 
 cam*/*
 staging_images/*
+config.yml
+Dockerfile
