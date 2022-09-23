@@ -1,5 +1,6 @@
 import os
 import fnmatch
+import time
 from Stream import Stream
 from Database import Database
 from multiprocessing import Process
@@ -8,7 +9,6 @@ from pytz import timezone
 from datetime import datetime
 
 
-streams = []
 buff_th = 5
 load_th = 10
 buff_dir = "staging_images"
@@ -21,10 +21,14 @@ def check_images():
                 buffer_images(cam_dir)
 
 def check_load(db):
+    last_load = time.time()
     while True:
         if len(fnmatch.filter(os.listdir(buff_dir), '*')) > load_th:
             load_images(db)
-
+            last_load = time.time()
+        elif time.time() - last_load > 7200:
+            print("Attempting restart due to timeout last load: "+str(time.time() - last_load))
+            main()
 
 def buffer_images(cam_dir):
     replace_count = 0
@@ -36,7 +40,8 @@ def buffer_images(cam_dir):
 def load_images(db):
     load_count = 0
     for image in Path(buff_dir).glob("*"):
-        db.upload_blob(image.name, image), os.remove(image)
+        db.upload_blob(image.name, image)
+        os.remove(image)
         load_count += 1
     print("LOADED IMAGES: "+str(load_count))
 
@@ -46,10 +51,11 @@ def correct_timezone(image, tz):
     adj_tz = image.name.split('+')[0] + datetime.strftime(adj_tz, '+%d-%m-%Y_%H-%M-%S.jpg')
     return adj_tz
 
-if __name__ == '__main__':
+def main():
     db = Database()
     db.set_container("frames")
 
+    streams = []
     streams.append(Stream("cam0", "https://www.youtube.com/watch?v=gcDWT-mTCOI", 1))
     streams.append(Stream("cam1", "https://www.youtube.com/watch?v=6NIt6ibAD6I", 1))
 
@@ -63,3 +69,6 @@ if __name__ == '__main__':
 
     loading_process = Process(target=check_load(db))
     loading_process.start()
+
+if __name__ == '__main__':
+    main()
