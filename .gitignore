@@ -2,6 +2,6 @@ __pycache__/
 venv/
 ffmpeg/
 
-cam*/*
+cams/*
 staging_images/*
 config.yml

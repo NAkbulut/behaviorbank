@@ -1,29 +1,25 @@
 import os
 import fnmatch
 import time
-from Stream import Stream
-from Database import Database
+from utils.Stream import Stream
+from utils.database import Database
+from utils.config import config
 from multiprocessing import Process
 from pathlib import Path
 from pytz import timezone
 from datetime import datetime
 
 
-buff_th = 5
-load_th = 10
-buff_dir = "staging_images"
-tzmap = {"cam0" : "UTC"}
-
 def check_images():
     while True:
-        for cam_dir in Path().glob('cam*'):
-            if len(fnmatch.filter(os.listdir(cam_dir), '*')) > buff_th:
+        for cam_dir in Path().glob(config["directories"]["cams"]):
+            if len(fnmatch.filter(os.listdir(cam_dir), '*')) > config["thresholds"]["buffer"]:
                 buffer_images(cam_dir)
 
 def check_load(db):
     last_load = time.time()
     while True:
-        if len(fnmatch.filter(os.listdir(buff_dir), '*')) > load_th:
+        if len(fnmatch.filter(os.listdir(config["directories"]["buffer"]), '*')) > config["thresholds"]["load"]:
             load_images(db)
             last_load = time.time()
         elif time.time() - last_load > 7200:
@@ -34,7 +30,9 @@ def buffer_images(cam_dir):
     replace_count = 0
     for image in Path(str(cam_dir)).glob("*"):
         try: 
-            os.replace(str(cam_dir)+"/"+image.name, buff_dir+"/"+correct_timezone(image, tzmap.get(str(cam_dir))))
+            try: tz = config["timezones"][str(cam_dir).split("\\")[1]] 
+            except: tz = None
+            os.replace(str(cam_dir)+"/"+image.name, config["directories"]["buffer"]+"/"+correct_timezone(image, tz))
         except:
             print("Moving to next fail due to stage image fail: "+image.name)
             continue
@@ -43,7 +41,7 @@ def buffer_images(cam_dir):
 
 def load_images(db):
     load_count = 0
-    for image in Path(buff_dir).glob("*"):
+    for image in Path(config["directories"]["buffer"]).glob("*"):
         if db.upload_blob(image.name, image):
             load_count += 1
         os.remove(image)
@@ -57,17 +55,20 @@ def correct_timezone(image, tz):
 
 def main():
     db = Database()
-    db.set_container("frames")
+    db.set_container(config["azure_storage"]["con_name"])
 
     streams = []
-    streams.append(Stream("cam0", "https://www.youtube.com/watch?v=gcDWT-mTCOI", 1))
-    streams.append(Stream("cam1", "https://www.youtube.com/watch?v=6NIt6ibAD6I", 1))
+    for stream in config["streams"]:
+        streams.append(Stream(config["streams"][stream]["cam"], config["streams"][stream]["url"], config["streams"][stream]["fps"]))
 
     for cam in streams:
         cam.simulate_url()
+        Path(config["directories"]["cams"].split('/')[0]+"/"+cam.name).mkdir(parents=True, exist_ok=True)
         cam_process = Process(target=cam.get_frames)
         cam_process.start()
     
+    Path(config["directories"]["buffer"]).mkdir(parents=True, exist_ok=True)
+
     staging_process = Process(target=check_images)
     staging_process.start()
 

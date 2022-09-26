@@ -6,7 +6,7 @@ from azure.cosmos.partition_key import PartitionKey
 
 
 class Database:
-    def __init__(self, conn_str=config['azure_storage_connection_string']):
+    def __init__(self, conn_str=config["azure_storage"]["connection_string"]):
         self.conn_str = conn_str
         self.blob_service_client = BlobServiceClient.from_connection_string(self.conn_str)
         self.blob_client = None
@@ -28,7 +28,7 @@ class Database:
             print('Exception: '+str(ex))
 
     def set_container(self, name):
-        blob_client = ContainerClient.from_connection_string(config['azure_storage_connection_string'], name)
+        blob_client = ContainerClient.from_connection_string(config["azure_storage"]["connection_string"], name)
         if blob_client.exists():
             self.blob_client = blob_client
         else:
