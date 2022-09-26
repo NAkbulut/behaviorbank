@@ -33,16 +33,20 @@ def check_load(db):
 def buffer_images(cam_dir):
     replace_count = 0
     for image in Path(str(cam_dir)).glob("*"):
-        os.replace(str(cam_dir)+"/"+image.name, buff_dir+"/"+correct_timezone(image, tzmap.get(str(cam_dir))))
+        try: 
+            os.replace(str(cam_dir)+"/"+image.name, buff_dir+"/"+correct_timezone(image, tzmap.get(str(cam_dir))))
+        except:
+            print("Moving to next fail due to stage image fail: "+image.name)
+            continue
         replace_count += 1
     print("STAGED IMAGES: "+str(replace_count))
 
 def load_images(db):
     load_count = 0
     for image in Path(buff_dir).glob("*"):
-        db.upload_blob(image.name, image)
+        if db.upload_blob(image.name, image):
+            load_count += 1
         os.remove(image)
-        load_count += 1
     print("LOADED IMAGES: "+str(load_count))
 
 def correct_timezone(image, tz):

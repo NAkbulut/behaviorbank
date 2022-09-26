@@ -40,6 +40,7 @@ class Database:
             with open(file, 'rb') as data:
                 blob = self.blob_client.upload_blob(blobname, data)
             self.upload_blob_reference(blobname, blob.url)
+            return blob.url
 
         except Exception as ex:
             print('Load fail: '+str(ex))
