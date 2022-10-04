@@ -1,0 +1,32 @@
+azure_storage:
+  connection_string:
+  con_name:
+
+azure_cosmos:
+  account_url:
+  account_key:
+  db_name:
+  con_name:
+  part_key:
+
+directories:
+  buffer:
+  cams:
+
+thresholds:
+  buffer: 
+  load:
+
+streams:
+  stream0:
+    cam:
+    video_url:
+    sensor_url:
+    timezone:
+    fps:
+  stream1:
+    cam:
+    video_url:
+    sensor_url:
+    timezone:
+    fps: 

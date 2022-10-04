@@ -5,7 +5,7 @@ from azure.storage.blob import BlobServiceClient, ContainerClient, __version__
 from azure.cosmos.partition_key import PartitionKey
 
 
-class Database:
+class DatabaseCM:
     def __init__(self, conn_str=config["azure_storage"]["connection_string"]):
         self.conn_str = conn_str
         self.blob_service_client = BlobServiceClient.from_connection_string(self.conn_str)

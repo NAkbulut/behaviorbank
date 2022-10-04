@@ -2,7 +2,7 @@ import os
 import fnmatch
 import time
 from utils.Stream import Stream
-from utils.database import Database
+from utils.database import DatabaseCM
 from utils.config import config
 from multiprocessing import Process
 from pathlib import Path
@@ -30,7 +30,7 @@ def buffer_images(cam_dir):
     replace_count = 0
     for image in Path(str(cam_dir)).glob("*"):
         try: 
-            try: tz = config["timezones"][str(cam_dir).split("\\")[1]] 
+            try: tz = config["streams"][str("stream" + (str(cam_dir).split("\\")[1])[-1])]["timezone"]
             except: tz = None
             os.replace(str(cam_dir)+"/"+image.name, config["directories"]["buffer"]+"/"+correct_timezone(image, tz))
         except:
@@ -54,12 +54,12 @@ def correct_timezone(image, tz):
     return adj_tz
 
 def main():
-    db = Database()
+    db = DatabaseCM()
     db.set_container(config["azure_storage"]["con_name"])
 
     streams = []
     for stream in config["streams"]:
-        streams.append(Stream(config["streams"][stream]["cam"], config["streams"][stream]["url"], config["streams"][stream]["fps"]))
+        streams.append(Stream(config["streams"][stream]["cam"], config["streams"][stream]["video_url"], config["streams"][stream]["fps"]))
 
     for cam in streams:
         cam.simulate_url()
