@@ -9,4 +9,4 @@ RUN pip install youtube_dl azure-storage-blob azure-cosmos PyYAML pytz
 
 WORKDIR /app
 
-CMD ["python", "main.py"]
+CMD ["python", "bb-frames-extractor.py"]
