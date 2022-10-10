@@ -49,7 +49,11 @@ class DatabaseCM:
         try:
             item = self.cosmoscontainer.read_item(id, id.split("+")[0])
             new_item = item
-            new_item.update({"frame": reference})
+            new_item.update(
+                {
+                    "frame": reference
+                }
+            )
             self.cosmoscontainer.replace_item(item, new_item)
 
         except:
@@ -58,9 +62,39 @@ class DatabaseCM:
                     "id": id,
                     "cam": id.split("+")[0],
                     "datetime": None, 
-                    "sensor1": None,
-                    "sensor2": None,
-                    "sensor3": None,
+                    "stemperature": None,
+                    "shumidity": None,
+                    "sprecipitation": None,
+                    "swind": None,
                     "frame": reference
+                }
+            )
+    
+    def upload_sensor_data(self, id, sdata):
+        try:
+            item = self.cosmoscontainer.read_item(id, id.split("+")[0])
+            new_item = item
+            new_item.update(
+                {
+                    "datetime": sdata[0],
+                    "stemperature": sdata[1],
+                    "shumidity": sdata[2],
+                    "sprecipitation": sdata[3],
+                    "swind": sdata[4]
+                }
+            )
+            self.cosmoscontainer.replace_item(item, new_item)
+        
+        except:
+            item = self.cosmoscontainer.create_item(
+                {
+                    "id": id,
+                    "cam": id.split("+")[0],
+                    "datetime": sdata[0], 
+                    "stemperature": sdata[1],
+                    "shumidity": sdata[2],
+                    "sprecipitation": sdata[3],
+                    "swind": sdata[4],
+                    "frame": None
                 }
             )
