@@ -1,14 +1,19 @@
-#add failsafe
+import time
 from utils.Sensor import Sensor
 from utils.database import DatabaseCM
 from utils.config import config
 from multiprocessing import Process, Manager
+from datetime import datetime
 
 
 def check_load(db, sensors):
-    #while True:
-        # if time ends on 0:
-    read_data(db, sensors)
+    last_load = time.time()
+    while True:
+        if datetime.now().strftime('%S') == '00':
+            read_data(db, sensors)
+        elif time.time() - last_load > 7200:
+            print("Attempting restart due to timeout last load: "+str(time.time() - last_load))
+            main()
 
 def read_data(db, sensors):
     jobs = []
@@ -19,7 +24,6 @@ def read_data(db, sensors):
         jobs.append(sensor_process)
     for job in jobs:
         job.join()
-    print(soutput)
     load_data(db, soutput)
         
 def load_data(db, sdata):
