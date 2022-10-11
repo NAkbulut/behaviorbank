@@ -16,6 +16,8 @@ class Sensor:
     def configure_driver(self):
         options = Options()
         options.add_argument("--headless")
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
         options.add_argument("lvog-level=1")
         driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
         driver.implicitly_wait(10)

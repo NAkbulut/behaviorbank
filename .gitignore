@@ -5,3 +5,4 @@ ffmpeg/
 cams/*
 staging_images/*
 config.yml
+geckodriver.log
