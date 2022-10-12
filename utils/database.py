@@ -39,7 +39,7 @@ class DatabaseCM:
         try:
             with open(file, 'rb') as data:
                 blob = self.blob_client.upload_blob(blobname, data)
-            self.upload_blob_reference(blobname, blob.url)
+            self.upload_blob_reference(blobname.split(".")[0], blob.url)
             return blob.url
 
         except Exception as ex:
