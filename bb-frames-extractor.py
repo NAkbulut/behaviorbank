@@ -30,7 +30,7 @@ def buffer_images(cam_dir):
     replace_count = 0
     for image in Path(str(cam_dir)).glob("*"):
         try: 
-            try: tz = config["streams"][str("stream" + (str(cam_dir).split("\\")[1])[-1])]["timezone"]
+            try: tz = config["streams"][str("stream" + (str(cam_dir).split("\\")[1])[-1])]["timezone"].replace('+', '%temp%').replace('-', '+').replace('%temp%', '-')
             except: tz = None
             os.replace(str(cam_dir)+"/"+image.name, config["directories"]["buffer"]+"/"+correct_timezone(image, tz))
         except:
