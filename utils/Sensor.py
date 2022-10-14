@@ -42,5 +42,5 @@ class Sensor:
         return self.correct_timezone(sdatetime), stemperature, shumidity, sprecipitation, swind
     
     def correct_timezone(self, dt):
-        adj_tz = datetime.fromtimestamp(dt/1000.0, timezone(self.stimezone)).replace(microsecond=0, tzinfo=None)
+        adj_tz = datetime.fromtimestamp(dt/1000.0, timezone(self.stimezone.replace('+', '%temp%').replace('-', '+').replace('%temp%', '-')))
         return adj_tz.strftime('%d-%m-%Y_%H-%M-00')
