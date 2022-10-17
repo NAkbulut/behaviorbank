@@ -32,6 +32,7 @@ class Sensor:
         sid = (f"{self.name}+{sdatetime}")
         if plog: print(f"Datetime: {sdatetime}\nTemperature: {stemperature}\nHumidity: {shumidity}\nPrecipitation: {sprecipitation}\nWind: {swind}")
         soutput.append((sid, sdatetime, stemperature, shumidity, sprecipitation, swind))
+        driver.quit()
 
     def parse_data(self, conditions, thermal):
         stemperature = int(thermal.find_elements(By.TAG_NAME, 'li')[1].get_attribute('textContent').split("°")[0])
